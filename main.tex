@@ -48,12 +48,11 @@
 	
 \item What problem are you solving?
 \\\\
-Our project aims to create an AI agent that can play the Truco card game. We will only work with the 2-player, Argentinian version of the game, but it can be played with 4 and 6 people too. The game is a turn-based game and it is played with Spanish Cards. We will omit the game’s detailed explanation since it can be pretty long, but it can be found in [1]. To put it shortly, each player is dealt 3 cards, then a first special round is played. This round is called “Envido” and any of the players can say “Envido” in its turn. If the other player accepts, the player with better cards wins 2 points, if the other player declines, the person who called it wins 1 point. Then the “Truco” round is played, in which, one by one, each player puts down one card, and the player with better cards wins. Similarly, as in the “Envido” stage, any player can say “Truco” and if the other player accepts, then whoever wins in the end, wins 2 points. If the other player declines, the player who said it wins 1 point. It is a game of bluffing because if my cards are petty bad, I can say “Truco” or “Envido” to make the other player think I have good cards and call off the round if the player declines.
+Our project aims to create an AI agent that can play the Truco card game. We will only work with the 2-player, Argentinian version of the game, but it can be played with 4 and 6 people too. The game is a turn-based game and it is played with Spanish Cards. We will omit the game’s detailed explanation since it can be pretty long, but it can be found in [1]. To put it shortly, each player is dealt 3 cards, then a first special round is played. This round is called “Envido” and any of the players can say “Envido” in its turn. If the other player accepts, the player with better cards wins 2 points, if the other player declines, the person who called it wins 1 point. Then the “Truco” round is played, in which, one by one, each player puts down one card, and the player with better cards wins. Similarly, as in the “Envido” stage, any player can say “Truco” and if the other player accepts, then whoever wins in the end, wins 2 points. If the other player declines, the player who said it wins 1 point. It is a game of bluffing because if my cards are petty bad, I can say “Truco” or “Envido” to make the other player think I have good cards and call of the round if the player declines.
 \\
 \item Describe the problem formally from a computational perspective. What are the inputs and outputs (exactly)?
 \\\\
 In the Spanish Deck, there are 4 suits: Coin, Cups, Swords, and Batons. Truco uses every suit, and numbers from 1 to 7 and 10 to 12.
-%% TODO: Eliminaria SUITS, CARD NUMBERS,DECK, CARD RANKKINGS Y ACTIONS SCORES
 \begin{itemize}
 	\item $SUITS = \{Coin, Cups, Swords, Batons\}$
 	\item $CARD\_NUMBERS = \{1, 2, 3, 4, 5, 6, 7, 10, 11, 12\}$
@@ -125,7 +124,11 @@ The game is turn-based, partially observable (since we don’t know the other’
 
 \item How are these algorithms typically used, and how are you using them?
 \\\\
-Sacar de los papers
+\begin{enumerate}
+	\item Minimax (with alpha/beta pruning): Minimax is typically used in game theory when our intention is to build an agent that minimizes the possible loss for a maximum loss scenario. The agent assumes that the opponent will always make the best decision possible.
+	\item Expectimax
+	\item Reinforcement Learning
+\end{enumerate}
 
 \item Have other people use similar algorithms to solve your problem before?
 \\\\
@@ -140,7 +143,8 @@ The idea is that our agent can play against us in a rational way. We are not exp
 There is not a straightforward way of measuring the agent’s performance since we don’t have an already existing agent to play against, so we plan to do two things: make the agent that uses Expectimax and Minimax play against the one that uses Reinforcement Learning to see which one is better, and then, play ourselves against our agents to see how they perform against a human.
 \item Are there risks for not getting all the results?
 \\\\ 
-The are no risks involved. If the agent loses, it loses. I do not think that it involves a risk of any sort if the agent performs poorly. Since this is just a game, and no money betting is involved,             
+We expect that Minimax and Expectimax work. We cannot assure that the agent will always win or make the best decisions. But it should play the game. In case of RL, the risk is that if Expectimax or Minimax are playing poorly, then the trained agent will not learn to play properly.    
+    
 \item If so, what will you do about it?
 \\\\	
 If the results are not good because the agent never wins against a human that plays well, we won’t consider it a failure, rather a result that shows that it is not an easy task to learn this game and perhaps a more complicated model such as [4] proposes is needed.
@@ -154,4 +158,3 @@ References
 [3] - https://github.com/mayleone1994/TRUCO-GAME-WITH-AI-
 [4] - https://www.sbgames.org/proceedings2020/ComputacaoShort/208047.pdf        
 \end{document}
-
