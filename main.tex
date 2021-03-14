@@ -48,13 +48,13 @@
 	
 \item What problem are you solving?
 \\\\
-Our project aims to create an AI agent that can play the Truco card game. We will only work with the 2-player, Argentinian version of the game, but it can be played with 4 and 6 people too. The game is a turn-based game and it is played with Spanish Cards. We will omit the game’s detailed explanation since it can be pretty long, but it can be found in [1]. To put it shortly, each player is dealt 3 cards, then a first special round is played. This round is called “Envido” and any of the players can say “Envido” in its turn. If the other player accepts, the player with better cards wins 2 points, if the other player declines, the person who called it wins 1 point. Then the “Truco” round is played, in which, one by one, each player puts down one card, and the player with better cards wins. Similarly, as in the “Envido” stage, any player can say “Truco” and if the other player accepts, then whoever wins in the end, wins 2 points. If the other player declines, the player who said it wins 1 point. It is a game of bluffing because if my cards are petty bad, I can say “Truco” or “Envido” to make the other player think I have good cards and call of the round if the player declines.
+Our project aims to create an AI agent that can play the Truco card game. We will only work with the 2-player, Argentinian version of the game, but it can be played with 4 and 6 people too. The game is a turn-based game and it is played with Spanish Cards. We will omit the game’s detailed explanation since it can be pretty long, but it can be found in [1]. To put it shortly, each player is dealt 3 cards, then a first special round is played. This round is called “Envido” and any of the players can say “Envido” in its turn. If the other player accepts, the player with better cards wins 2 points, if the other player declines, the person who called it wins 1 point. Then the “Truco” round is played, in which, one by one, each player puts down one card, and the player with better cards wins. Similarly, as in the “Envido” stage, any player can say “Truco” and if the other player accepts, then whoever wins in the end, wins 2 points. If the other player declines, the player who said it wins 1 point. It is a game of bluffing because if my cards are petty bad, I can say “Truco” or “Envido” to make the other player think I have good cards and call off the round if the player declines.
 \\
 \item Describe the problem formally from a computational perspective. What are the inputs and outputs (exactly)?
 \\\\
-In the Spanish Deck, there are 4 suits: Coin, Cups, Swords, and Batons. Truco uses every suit, and numbers from 1 to 7 and 10 to 12.
+In the Spanish Deck, there are 4 suits: Coin, Cups, Swords, and Batons. Truco uses every suit and numbers from 1 to 7 and 10 to 12.
 \begin{itemize}
-	\item Initial State: The initial state $S_0$ is composed by:
+	\item INITIAL STATE: The initial state $S_0$ is composed by:
 	\begin{enumerate}
 		\item The agent's hand of 3 cards.
 		\item The agent's score at the moment. At start it will be equal to zero.      
@@ -65,38 +65,39 @@ In the Spanish Deck, there are 4 suits: Coin, Cups, Swords, and Batons. Truco us
 	\[
 	PLAYER(s) = 
 	\begin{cases}
-	Agent,& \text{if } ((s-1).round < s.round \land (s-1).winner = Agent) \\ 
-	& \lor ((s-1).player \neq Agent)  \\
+	Agent,& \text{if } (s_{t-1}.round < s.round \land s_{t-1}.winner = Agent) \\ 
+	& \lor (s_{t-1}.player \neq Agent)  \\
 	Opponent,              & \text{otherwise}
 	\end{cases}
 	\]
 	\item ACTION(s):
-	The possible actions the agent can perform will be a subset $A^\prime$ of $A = \{Envido, Truco, Wanted, Not wanted, Fold, PlayCard(Card) \}$. An action will be included in the actions set for an specific game state if they follow the following rules:
+	The possible actions the agent can perform will be a subset $A^\prime$ of \\
+	$A = \{Envido, Truco, Accept, Decline, Fold, PlayCard(Card) \}$. An action will be included in the actions set for a specific game state if they follow the following rules:
 	\begin{itemize}
 		\item The Action $Envido \in A^\prime$ if the player is in round 1, and Envido has not been played before.
-		\item Both actions, $Wanted$ and $Not Wanted$, will be the only ones included in $A^\prime$ if $Envido$ or $Truco$ has been played on the previous round by the opponent.
-		\item The action $Fold$ can be played always.
-		\item The action $Truco$ can be played only if it has not being played before.
+		\item Both actions, $Accept$ and $Decline$, will be the only ones included in $A^\prime$ if $Envido$ or $Truco$ had been played on the previous round by the opponent.
+		\item The action $Fold$ can be played at any state.
+		\item The action $Truco$ can be played only if it had not been played before.
 	\end{itemize}
 	\item RESULT(s, a): 
 	\begin{itemize}
-		\item If the action is $Fold$, the game is over and the opponent wins a point.
-		\item If $Truco$ was played by the opponent, we replied with $Wanted$ and we lost the hand. Opponent wins 4 points.
-		\item If $Truco$ was played by the opponent, we replied with $Wanted$ and we win the hand. Agent wins 4 points.
-		\item If $Truco$ was played by the opponent, and we replied with $Not Wanted$. Opponent wins 1 point.
-		\item If $Envido$ was played by the opponent, we replied with $Wanted$ and we lost the bet. Opponent wins 2 points.
-		\item If $Envido$ was played by the opponent, we replied with $Wanted$ and we win the bet. Agent wins 2 points.
-		\item If $Envido$ was played by the opponent, and we replied with $Not Wanted$. Opponent wins 1 point.
+		\item If the action is $Fold$, the game is over and the opponent wins the points at stake at the moment.
+		\item If $Truco$ was played by the opponent, we replied with $Accept$ and we lost the round, Opponent wins 2 points.
+		\item If $Truco$ was played by the opponent, we replied with $Accept$ and we won the round, Agent wins 2 points.
+		\item If $Truco$ was played by the opponent, and we replied with $Decline$, Opponent wins 1 point.
+		\item If $Envido$ was played by the opponent, we replied with $Accept$ and we lost the bet, Opponent wins 2 points.
+		\item If $Envido$ was played by the opponent, we replied with $Accept$ and we won the bet, Agent wins 2 points.
+		\item If $Envido$ was played by the opponent, and we replied with $Decline$, Opponent wins 1 point.
 		\item All the above rules apply on the opposite scenario, when the agent plays $Truco$ or $Envido$ and the opponent has to reply.
 		\item Playing a card in a round where the other player has already played, ends the round.
 	\end{itemize}
 	\item GOAL\_STATE(s):
 	\begin{itemize}
 		\item If in the previous state a $Fold$ action was played. The game is over.
-		\item If is the second round the agent wins or the second round the agent loses. The game is over.
-		\item If agent replies to $Truco$ with $No wanted$, the game is over. Same applies to if the opponent replies with $No wanted$ to $Truco$.
+		\item If it is the second round the agent wins or the second round the agent loses, the game is over.
+		\item If the Agent replies to $Truco$ with $Decline$, the game is over. Same applies if the Opponent replies with $Decline$ to $Truco$.
 	\end{itemize}
-	\item UTILITY(s): We are thinking about creating a heuristic that takes into account the cards in our hand and their strength. And combines this measure with the current score in the game.
+	\item UTILITY(s): We will use the current score in addition to a heuristic of how good are the cards we have in our hand. For this, we will assign a score to each card and add them all. We will have to experiment how much weight do we give the to ``hand's score" and to the actual score.
 \end{itemize}
 
 \item What data are you using (exactly)?
@@ -114,46 +115,49 @@ We intend to use three algorithms:
 	\item Expectimax
 	\item Reinforcement Learning
 \end{enumerate}
-And a combination of the above algorithms depending on the particular scenario we are facing.
 
 
 \item Why are these algorithms appropriate?
 \\\\
-The game is turn-based, partially observable (since we don’t know the other’s player card), and it has a score, which makes Minimax and Expectimax suitable. The fact that we have a score that directly translates to rewards in Reinforcement Learning together with the fact that we don’t have a large database of recorded games that we can use in supervised Machine Learning, makes Reinforcement Learning appropriate too.
+The game is turn-based, partially observable (since we don’t know the other’s player card), and it has a score, which makes Minimax and Expectimax suitable. In particular, we have a fixed set of cards which makes it easy to calculate the probabilities for Expectimax. The fact that we have a score that directly translates to rewards in Reinforcement Learning together with the fact that we don’t have a large database of recorded games that we can use in supervised Machine Learning, makes Reinforcement Learning appropriate too.
 
 \item How are these algorithms typically used, and how are you using them?
 \\\\
 \begin{enumerate}
-	\item Minimax (with alpha/beta pruning): Minimax is typically used in game theory when our intention is to build an agent that minimizes the possible loss for a maximum loss scenario. The agent assumes that the opponent will always make the best decision possible. In our problem, the agent will be the maximizer, and the opponent the minimizer. And we will use a measure of utility in function of the current score and the strength of the cards in our hand. This will be made by Guzman Vigliecca.
-	\item Expectimax: Expectimax is a variation of Minimax. The idea is to take into account the probabilities of certain outcomes when deciding the next action. Since we do not know what cards the opponent has, but we can make a guess based on our current hand and the cards already played, it makes sense to use this algorithm. This will be made by Agustin Gregorieu.
-	\item Reinforcement Learning
+	\item Minimax (with alpha/beta pruning): Minimax is typically used in game theory when our intention is to build an agent that minimizes the possible loss for a maximum loss scenario. The agent assumes that the opponent will always make the best decision possible. In our problem, the agent will be the maximizer, and the opponent the minimizer. We will use as utility a function of the current score and the strength of the cards in our hand. We will experiment how deep can we run the algorithm. This will be made by Guzman Vigliecca.
+	\item Expectimax: Expectimax is a variation of Minimax. The idea is to take into account the probabilities of certain outcomes when deciding the next action. Since we do not know what cards the opponent has, but we can make a guess based on our current hand and the cards already played, it makes sense to use this algorithm. We will use the Minimax algorithm as a base for this one. This will be made by Guzman Vigliecca.
+	\item Reinforcement Learning: There are a lot of RL algorithms. We will implement the environment and then use one of the baselines from [2]. It should not be hard to try different ones once we have the environment, but as a starting point we will start with DQN, which uses neural networks to estimate future rewards. This will be made by Agustin Gregorieu.
 \end{enumerate}
 
 \item Have other people use similar algorithms to solve your problem before?
 \\\\
-We could only find two public Github repositories that supposedly are an AI agent for Brazilian Truco ([2] and [3]) but they don’t even have a readme so it is likely that they are of no use to us. There is a pretty interesting paper that proposes a Markovian model for the Brazilian Truco [4] but it is a much more complicated version of the game, and they don’t use any of the algorithms we propose here.
+We could only find two public Github repositories that supposedly are an AI agent for Brazilian Truco ([3] and [4]) but they don’t even have a readme so it is likely that they are of no use to us. There is a pretty interesting paper that proposes a Markovian model for the Brazilian Truco [4] but it is a much more complicated version of the game, and they don’t use any of the algorithms we propose here.
 
 \item What results do you expect to show?
 \\\\
-The idea is that our agent can play against us in a rational way. We are not expecting it to be flawless, since Truco involves a lot of bluffing. But we expect to see intelligent responses.                                                                                                                        
+The game is a turn-based card game, so we expect that we are going to be able to create an agent that can play the game using Minimax and Expectimax. Whether the agent will be good or not at playing the game it's harder to predict. We definitely expect  that the agent will play following the rules and make at least correct simple decisions (fold if there is no chance of winning, say ``Truco" if we have the best possible cards in our hands, etc). As for RL, since we will train it using one of the other algorithms, the results will depend on how good the other algorithm is. If we do it properly, we should obtain a trained agent that plays at least as good as the MiniMax and Expectimax agent.                                                                                                                     
 
 \item What comparisons will you do?
 \\\\
 There is not a straightforward way of measuring the agent’s performance since we don’t have an already existing agent to play against, so we plan to do two things: make the agent that uses Expectimax and Minimax play against the one that uses Reinforcement Learning to see which one is better, and then, play ourselves against our agents to see how they perform against a human.
 \item Are there risks for not getting all the results?
 \\\\ 
-We expect that Minimax and Expectimax work. We cannot assure that the agent will always win or make the best decisions. But it should play the game. In case of RL, the risk is that if Expectimax or Minimax are playing poorly, then the trained agent will not learn to play properly.    
+We expect that Minimax and Expectimax work. We cannot assure that the agent will always win or make the best decisions, but it should play the game. The risk here would be more logistical than from the actual algorithms, since we have to code the whole game from scratch and just then, start with the algorithms, and there might not be enough time for all that. In case of RL, the risk is that if Expectimax or Minimax are playing poorly, then the trained agent will not learn to play properly.    
     
 \item If so, what will you do about it?
 \\\\	
-If the results are not good because the agent never wins against a human that plays well, we won’t consider it a failure, rather a result that shows that it is not an easy task to learn this game and perhaps a more complicated model such as [4] proposes is needed.
+If we don't have enough time, we will drop Expectimax. This decision is based on that the added value of it is not that much (just considers the card's probabilities) but the actual probability's calculation can be hard to implement. If the results are not good because the agent never wins against a human that plays well, we won’t consider it a failure, rather a result that shows that it is not an easy task to learn this game and perhaps a more complicated model such as [5] proposes is needed.
+
+\item References
+\begin{enumerate}
+    \item[] [1] - https://en.wikipedia.org/wiki/Truco
+    \item[] [2] - https://stable-baselines.readthedocs.io/en/master/
+    \item[] [3] - https://github.com/willyandan/truco.ai
+    \item[] [4] - https://github.com/mayleone1994/TRUCO-GAME-WITH-AI-
+    \item[] [5] - https://www.sbgames.org/proceedings2020/ComputacaoShort/208047.pd
 
 \end{enumerate}
 
+\end{enumerate}
 
-References
-[1] -  https://en.wikipedia.org/wiki/Truco
-[2] - https://github.com/willyandan/truco.ai
-[3] - https://github.com/mayleone1994/TRUCO-GAME-WITH-AI-
-[4] - https://www.sbgames.org/proceedings2020/ComputacaoShort/208047.pdf        
 \end{document}
