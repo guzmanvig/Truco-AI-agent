@@ -54,14 +54,6 @@ Our project aims to create an AI agent that can play the Truco card game. We wil
 \\\\
 In the Spanish Deck, there are 4 suits: Coin, Cups, Swords, and Batons. Truco uses every suit, and numbers from 1 to 7 and 10 to 12.
 \begin{itemize}
-	\item $SUITS = \{Coin, Cups, Swords, Batons\}$
-	\item $CARD\_NUMBERS = \{1, 2, 3, 4, 5, 6, 7, 10, 11, 12\}$
-	\item $DECK = \{(n, s) | \forall_{n \in CARD\_NUMBERS} \land \forall_{s \in SUITS} \}$
-	\item $ROUNDS = \{1, 2, 3\}$
-	\item $PLAYERS = \{P1, P2\}$
-	\item $TURN = P1/P2$
-	\item $CARD\_RANKINGS = \{  \}$
-	\item $ACTION\_SCORES = \{  \}$
 	\item Initial State: The initial state $S_0$ is composed by:
 	\begin{enumerate}
 		\item The agent's hand of 3 cards.
@@ -98,6 +90,12 @@ In the Spanish Deck, there are 4 suits: Coin, Cups, Swords, and Batons. Truco us
 		\item All the above rules apply on the opposite scenario, when the agent plays $Truco$ or $Envido$ and the opponent has to reply.
 		\item Playing a card in a round where the other player has already played, ends the round.
 	\end{itemize}
+	\item GOAL\_STATE(s):
+	\begin{itemize}
+		\item If in the previous state a $Fold$ action was played. The game is over.
+		\item If is the second round the agent wins or the second round the agent loses. The game is over.
+		\item If agent replies to $Truco$ with $No wanted$, the game is over. Same applies to if the opponent replies with $No wanted$ to $Truco$.
+	\end{itemize}
 \end{itemize}
 
 \item What data are you using (exactly)?
@@ -125,8 +123,8 @@ The game is turn-based, partially observable (since we don’t know the other’
 \item How are these algorithms typically used, and how are you using them?
 \\\\
 \begin{enumerate}
-	\item Minimax (with alpha/beta pruning): Minimax is typically used in game theory when our intention is to build an agent that minimizes the possible loss for a maximum loss scenario. The agent assumes that the opponent will always make the best decision possible.
-	\item Expectimax
+	\item Minimax (with alpha/beta pruning): Minimax is typically used in game theory when our intention is to build an agent that minimizes the possible loss for a maximum loss scenario. The agent assumes that the opponent will always make the best decision possible. In our problem, the agent will be the maximizer, and the opponent the minimizer. And we will use a measure of utility in function of the current score and the strength of the cards in our hand. This will be made by Guzman Vigliecca.
+	\item Expectimax: Expectimax is a variation of Minimax. The idea is to take into account the probabilities of certain outcomes when deciding the next action. Since we do not know what cards the opponent has, but we can make a guess based on our current hand and the cards already played, it makes sense to use this algorithm. This will be made by Agustin Gregorieu.
 	\item Reinforcement Learning
 \end{enumerate}
 
