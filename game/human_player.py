@@ -5,6 +5,15 @@ class HumanPlayer:
         self.hand = None
         self.score = 0
 
-    def printHand(self):
+    def getCardFromHand(self, cardString):
+        # 12-Coin
         for card in self.hand:
-            print(card)
+            if cardString in str(card):
+                return card
+        raise ValueError("You don't have that card!")
+
+    def printHand(self):
+        string = "||"
+        for card in self.hand:
+            string += " " + str(card) + " ||"
+        return string

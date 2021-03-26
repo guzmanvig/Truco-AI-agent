@@ -21,7 +21,7 @@ class Card:
         return "{}-{}: {}".format(self.number, self.suit, self.rank)
 
 class Actions:
-    PLAY_CARD = "play"
+    PLAY_CARD = "playCard"
     ENVIDO = "envido"
     TRUCO = "truco"
     ACCEPT = "accept"
@@ -30,15 +30,15 @@ class Actions:
 
 class GameState:
     def __init__(self, firstPlayer):
-        self.round = 0
+        self.round = 1
         self.playerTurn = firstPlayer
         self.score = dict()
         self.trucoCalled = False
         self.trucoAnswered = False
         self.envidoCalled = False
         self.envidoAnswered = False
-        self.cardPlayedPerRound = []
-        self.isTerminal = False
+        self.history = [[], [], []]
+        self.winner = None
 
 
 
@@ -58,6 +58,8 @@ class Game:
 
         self.state = GameState(player1)
 
+    def getState(self):
+        return self.state
 
 
     def generateDeck(self):
@@ -150,7 +152,9 @@ class Game:
             return [Actions.ACCEPT, Actions.DECLINE]
         if state.envidoCalled and not state.envidoAnswered:
             return [Actions.ACCEPT, Actions.DECLINE]
-        if not state.envidoCalled and state.round == 0:
+        if not state.envidoCalled and state.round == 1:
+            if not state.trucoCalled:
+                return [Actions.PLAY_CARD, Actions.ENVIDO, Actions.FOLD, Actions.TRUCO]
             return [Actions.PLAY_CARD, Actions.ENVIDO, Actions.FOLD]
         if not state.trucoCalled:
             return [Actions.PLAY_CARD, Actions.TRUCO, Actions.FOLD]
@@ -166,36 +170,79 @@ class Game:
             raise ValueError('Invalid action')
 
         nextState = copy(state)
-        # TODO: if  last round was bla bla
-        if state.playerTurn == self.player1:
-            nextState.playerTurn = self.player2
+        if player == self.player1:
+            otherPlayer = self.player2
         else:
-            nextState.playerTurn = self.player1
+            otherPlayer = self.player1
 
         if action == Actions.TRUCO:
             nextState.trucoCalled = True
+            nextState.playerTurn = otherPlayer
         if action == Actions.ENVIDO:
             nextState.envidoCalled = True
+            nextState.playerTurn = otherPlayer
         if action == Actions.ACCEPT and state.trucoCalled:
             nextState.trucoAnswered = True
+            nextState.playerTurn = otherPlayer
         if action == Actions.DECLINE and state.trucoCalled:
-            nextState.isTerminal = True
+            nextState.winner = otherPlayer
+            nextState.playerTurn = otherPlayer
         if action == Actions.ACCEPT and state.envidoCalled:
             nextState.envidoAnswered = True
+            nextState.playerTurn = otherPlayer
         if action == Actions.DECLINE and state.envidoCalled:
             nextState.envidoAnswered = True
+            nextState.playerTurn = otherPlayer
         if action == Actions.FOLD:
-            nextState.isTerminal = True
+            nextState.winner = otherPlayer
+            nextState.playerTurn = otherPlayer
         if action == Actions.PLAY_CARD:
+            index = nextState.round - 1
+            round_cards = nextState.history[index]
+            round_cards.append((card, player))
+            if len(round_cards) == 2:
+                round_winner = self.getRoundWinner(round_cards)
+                round_cards.append(round_winner)
+                if round_winner == otherPlayer:
+                    nextState.playerTurn = otherPlayer
+                else:
+                    nextState.playerTurn = player
+                nextState.round += 1
+                winner = self.getWinner(nextState.history)
+                if winner is not None:
+                    nextState.winner = winner
+        return nextState
 
+    def getRoundWinner(self, cards):
+        card1 = cards[0][0]  # (card , payer)
+        player1 = cards[0][1]
+        card2 = cards[1][0]
+        player2 = cards[1][0]
+        if card1.rank > card2.rank:
+            return player1
+        elif card1.rank < card2.rank:
+            return player2
+        else: # Draw
+            return None
 
-
-
-
-
-
-
-
+    def getWinner(self, history):
+        wonRounds = [0, 0]  # [score player 1, score player 2]
+        for entry in history:
+            # [(card, player) (card, player) winner]
+            roundWinner = entry[2]
+            if roundWinner == self.player1:
+                wonRounds[0] = wonRounds[0] + 1
+            elif roundWinner == self.player2:
+                wonRounds[0] = wonRounds[0] + 1
+            else: # draw
+                wonRounds[0] = wonRounds[0] + 1
+                wonRounds[1] = wonRounds[1] + 1
+        if wonRounds[0] == 2:
+            return self.player1
+        elif wonRounds[1] == 2:
+            return self.player2
+        else:
+            return None
 
 
     def dealCards(self, player):
