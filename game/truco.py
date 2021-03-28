@@ -1,6 +1,6 @@
 import random
 from itertools import combinations
-from copy import copy
+from copy import copy, deepcopy
 
 
 class CardSuit:
@@ -20,6 +20,7 @@ class Card:
     def __str__(self):
         return "{}-{}: {}".format(self.number, self.suit, self.rank)
 
+
 class Actions:
     PLAY_CARD = "playCard"
     ENVIDO = "envido"
@@ -28,8 +29,9 @@ class Actions:
     DECLINE = "decline"
     FOLD = 'fold'
 
+
 class GameState:
-    def __init__(self, firstPlayer):
+    def __init__(self, firstPlayer, secondPlayer, firstPlayerHand, secondPlayerHand):
         self.round = 1
         self.playerTurn = firstPlayer
         self.score = dict()
@@ -40,27 +42,45 @@ class GameState:
         self.history = [[], [], []]
         self.winner = None
 
-
+        self.hands = {
+            firstPlayer: firstPlayerHand,
+            secondPlayer: secondPlayerHand
+        }
+    
+    def removeCardFromHand(self, player, card):
+        playerHand = copy(self.hands[player])
+        playerHand.remove(card)
+        self.hands[player] = playerHand 
+    
+    def getPlayerHand(self, player):
+        return copy(self.hands[player])
 
 
 class Game:
-    def __init__(self, player1, player2):
+
+    def __init__(self):
         # Create deck
         self.deck = None
         self.generateDeck()
         self.shuffleDeck()
 
         # Deal cards to player
-        self.player1 = player1
-        self.player2 = player2
-        self.dealCards(player1)
-        self.dealCards(player2)
-
-        self.state = GameState(player1)
+        self.player1 = None
+        self.player2 = None
 
     def getState(self):
         return self.state
 
+    def setPlayers(self, player1, player2):
+
+        self.player1 = player1
+        self.player2 = player2
+
+    def initGameState(self):
+        handPlayer1 = self.getHand()
+        handPlayer2 = self.getHand()
+
+        self.state = GameState(self.player1, self.player2, handPlayer1, handPlayer2)
 
     def generateDeck(self):
         # SWORDS
@@ -115,11 +135,11 @@ class Game:
 
     def shuffleDeck(self):
         random.shuffle(self.deck)
-    
+
     def getEnvidoScore(self, hand):
-        #Calculate points of envido.
+        # Calculate points of envido.
         pairCombinations = list(combinations(hand, 2))
-        
+
         envidoScore = 0
 
         # We compute the score for each possible pair combination of the 3 hand cards. And we return the maximum one.
@@ -132,7 +152,7 @@ class Game:
             secondCardScore = secondCard.number if secondCard.number < 10 else 0
 
             combinationScore = None
-            
+
             # If both cards have the same suit, then we add 20 to their sum. Otherwise, we get the largest one.
             if firstCard.suit == secondCard.suit:
                 combinationScore = 20 + firstCardScore + secondCardScore
@@ -140,7 +160,7 @@ class Game:
                 combinationScore = max([firstCardScore, secondCardScore])
 
             envidoScore = max([combinationScore, envidoScore])
-        
+
         return envidoScore
 
     def getLegalActions(self, player, state):
@@ -161,8 +181,7 @@ class Game:
 
         return [Actions.PLAY_CARD, Actions.FOLD]
 
-
-    def playAction(self, player, state, action, card = None):
+    def playAction(self, player, state, action, card=None):
         if player != state.playerTurn:
             raise ValueError('Wrong player')
         legalActions = self.getLegalActions(player, state)
@@ -172,6 +191,8 @@ class Game:
         # TODO: WE NEED TO MANTAIN THE HAND OF EACH PLAYER
         # TODO: WE CAN DO A DEEP COPY. OR ADD THE HAND TO THE STATE
         nextState = copy(state)
+        aux = nextState.hands.copy()
+        nextState.hands = aux
 
         if player == self.player1:
             otherPlayer = self.player2
@@ -200,6 +221,9 @@ class Game:
             nextState.winner = otherPlayer
             nextState.playerTurn = otherPlayer
         if action == Actions.PLAY_CARD:
+
+            nextState.removeCardFromHand(player, card)
+
             index = nextState.round - 1
             round_cards = nextState.history[index]
             round_cards.append((card, player))
@@ -224,12 +248,12 @@ class Game:
             return player2
         elif card1.rank < card2.rank:
             return player1
-        else: # Draw
+        else:  # Draw
             return None
 
     def getWinner(self, history):
-        #TODO: we are not taking into account some weird cases like double or triple draw
-        #TODO: we can leave it as is, as a simplification
+        # TODO: we are not taking into account some weird cases like double or triple draw
+        # TODO: we can leave it as is, as a simplification
 
         wonRounds = [0, 0]  # [score player 1, score player 2]
         for entry in history:
@@ -240,25 +264,28 @@ class Game:
                     wonRounds[0] = wonRounds[0] + 1
                 elif roundWinner == self.player2:
                     wonRounds[1] = wonRounds[0] + 1
-                else: # draw
+                else:  # draw
                     wonRounds[0] = wonRounds[0] + 1
                     wonRounds[1] = wonRounds[1] + 1
 
-        if wonRounds[0] == 2:
+        if wonRounds[0] == wonRounds[1] == 2:
+            return history[0][2]
+        elif wonRounds[0] == 2:
             return self.player1
         elif wonRounds[1] == 2:
             return self.player2
+        elif wonRounds[0] == wonRounds[1] == 3:  # Triple draw
+            return self.player1
         else:
             return None
 
-
-    def dealCards(self, player):
+    def getHand(self):
         hand = []
         for i in range(3):
             hand.append(self.deck.pop(0))
-        player.hand = hand
+
+        return hand
 
     def printDeck(self):
         for card in self.deck:
             print(card)
-
