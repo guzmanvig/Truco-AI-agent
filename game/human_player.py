@@ -9,6 +9,7 @@ class HumanPlayer:
         # 12-Coin
         for card in self.hand:
             if cardString in str(card):
+                self.hand.remove(card)
                 return card
         raise ValueError("You don't have that card!")
 

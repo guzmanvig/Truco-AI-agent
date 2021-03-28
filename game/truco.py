@@ -169,7 +169,10 @@ class Game:
         if action not in legalActions:
             raise ValueError('Invalid action')
 
+        # TODO: WE NEED TO MANTAIN THE HAND OF EACH PLAYER
+        # TODO: WE CAN DO A DEEP COPY. OR ADD THE HAND TO THE STATE
         nextState = copy(state)
+
         if player == self.player1:
             otherPlayer = self.player2
         else:
@@ -200,12 +203,11 @@ class Game:
             index = nextState.round - 1
             round_cards = nextState.history[index]
             round_cards.append((card, player))
+            nextState.playerTurn = otherPlayer
             if len(round_cards) == 2:
                 round_winner = self.getRoundWinner(round_cards)
                 round_cards.append(round_winner)
-                if round_winner == otherPlayer:
-                    nextState.playerTurn = otherPlayer
-                else:
+                if round_winner != otherPlayer:
                     nextState.playerTurn = player
                 nextState.round += 1
                 winner = self.getWinner(nextState.history)
@@ -217,26 +219,31 @@ class Game:
         card1 = cards[0][0]  # (card , payer)
         player1 = cards[0][1]
         card2 = cards[1][0]
-        player2 = cards[1][0]
+        player2 = cards[1][1]
         if card1.rank > card2.rank:
-            return player1
-        elif card1.rank < card2.rank:
             return player2
+        elif card1.rank < card2.rank:
+            return player1
         else: # Draw
             return None
 
     def getWinner(self, history):
+        #TODO: we are not taking into account some weird cases like double or triple draw
+        #TODO: we can leave it as is, as a simplification
+
         wonRounds = [0, 0]  # [score player 1, score player 2]
         for entry in history:
             # [(card, player) (card, player) winner]
-            roundWinner = entry[2]
-            if roundWinner == self.player1:
-                wonRounds[0] = wonRounds[0] + 1
-            elif roundWinner == self.player2:
-                wonRounds[0] = wonRounds[0] + 1
-            else: # draw
-                wonRounds[0] = wonRounds[0] + 1
-                wonRounds[1] = wonRounds[1] + 1
+            if len(entry) == 3:
+                roundWinner = entry[2]
+                if roundWinner == self.player1:
+                    wonRounds[0] = wonRounds[0] + 1
+                elif roundWinner == self.player2:
+                    wonRounds[1] = wonRounds[0] + 1
+                else: # draw
+                    wonRounds[0] = wonRounds[0] + 1
+                    wonRounds[1] = wonRounds[1] + 1
+
         if wonRounds[0] == 2:
             return self.player1
         elif wonRounds[1] == 2:
