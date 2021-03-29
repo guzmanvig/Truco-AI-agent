@@ -11,6 +11,13 @@ class CardSuit:
     SWORD = "Sword"
 
 
+class ActionScore:
+    TRUCO_WON = 4
+    TRUCO_DECLINED = 1
+    PLAYER_FOLDED = 1
+    ENVIDO_WON = 2
+    ENVIDO_DECLINED = 1
+
 class Card:
 
     def __init__(self, number, suit, rank):
@@ -35,7 +42,7 @@ class GameState:
     def __init__(self, firstPlayer, secondPlayer, firstPlayerHand, secondPlayerHand):
         self.round = 1
         self.playerTurn = firstPlayer
-        self.score = dict()
+        self.playersScore = defaultdict(0)
         self.trucoCalled = False
         self.trucoAnswered = False
         self.envidoCalled = False
@@ -55,6 +62,12 @@ class GameState:
 
     def getPlayerHand(self, player):
         return copy(self.hands[player])
+
+    def getPlayerScore(self, player):
+        return self.playersScore[player]
+    
+    def incrementPlayerScore(self, player, score):
+        self.playersScore[player] += score
 
 
 class Game:
@@ -182,6 +195,23 @@ class Game:
             return [Actions.PLAY_CARD, Actions.TRUCO, Actions.FOLD]
 
         return [Actions.PLAY_CARD, Actions.FOLD]
+    
+    def calculateEnvidoWinner(self, state):
+        
+        player1 = self.player1
+        player2 = self.player2
+        player1Hand = state.hands[player1]
+        player2Hand = state.hands[player2]
+        player1EnvidoScore = self.getEnvidoScore(player1Hand)
+        player2EnvidoScore = self.getEnvidoScore(player2Hand)
+
+        if(player1EnvidoScore > player2EnvidoScore):
+            state.updatePlayersScore(player1, ActionScore.ENVIDO_WON)
+        elif (player1EnvidoScore < player2EnvidoScore):
+            state.updatePlayersScore(player2, ActionScore.ENVIDO_WON)
+        else: 
+            state.updatePlayersScore(player1, ActionScore.ENVIDO_WON)
+
 
     def playAction(self, player, state, action, card=None):
         if player != state.playerTurn:
@@ -191,8 +221,6 @@ class Game:
             raise ValueError('Invalid action')
 
         nextState = copy(state)
-        aux = nextState.hands.copy()
-        nextState.hands = aux
 
         if player == self.player1:
             otherPlayer = self.player2
@@ -202,24 +230,34 @@ class Game:
         if action == Actions.TRUCO:
             nextState.trucoCalled = True
             nextState.playerTurn = otherPlayer
+
         if action == Actions.ENVIDO:
             nextState.envidoCalled = True
             nextState.playerTurn = otherPlayer
+
         if action == Actions.ACCEPT and state.trucoCalled:
             nextState.trucoAnswered = True
             nextState.playerTurn = otherPlayer
+
         if action == Actions.DECLINE and state.trucoCalled:
             nextState.winner = otherPlayer
             nextState.playerTurn = otherPlayer
+
         if action == Actions.ACCEPT and state.envidoCalled:
             nextState.envidoAnswered = True
             nextState.playerTurn = otherPlayer
+
+            self.calculateEnvidoWinner(state)
+            
+            
         if action == Actions.DECLINE and state.envidoCalled:
             nextState.envidoAnswered = True
             nextState.playerTurn = otherPlayer
+
         if action == Actions.FOLD:
             nextState.winner = otherPlayer
             nextState.playerTurn = otherPlayer
+
         if action == Actions.PLAY_CARD:
 
             nextState.removeCardFromHand(player, card)
