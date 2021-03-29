@@ -1,6 +1,7 @@
 import random
 from itertools import combinations
 from copy import copy, deepcopy
+from collections import defaultdict
 
 
 class CardSuit:
@@ -46,12 +47,12 @@ class GameState:
             firstPlayer: firstPlayerHand,
             secondPlayer: secondPlayerHand
         }
-    
+
     def removeCardFromHand(self, player, card):
         playerHand = copy(self.hands[player])
         playerHand.remove(card)
-        self.hands[player] = playerHand 
-    
+        self.hands[player] = playerHand
+
     def getPlayerHand(self, player):
         return copy(self.hands[player])
 
@@ -80,7 +81,8 @@ class Game:
         handPlayer1 = self.getHand()
         handPlayer2 = self.getHand()
 
-        self.state = GameState(self.player1, self.player2, handPlayer1, handPlayer2)
+        self.state = GameState(self.player1, self.player2,
+                               handPlayer1, handPlayer2)
 
     def generateDeck(self):
         # SWORDS
@@ -188,8 +190,6 @@ class Game:
         if action not in legalActions:
             raise ValueError('Invalid action')
 
-        # TODO: WE NEED TO MANTAIN THE HAND OF EACH PLAYER
-        # TODO: WE CAN DO A DEEP COPY. OR ADD THE HAND TO THE STATE
         nextState = copy(state)
         aux = nextState.hands.copy()
         nextState.hands = aux
@@ -229,7 +229,7 @@ class Game:
             round_cards.append((card, player))
             nextState.playerTurn = otherPlayer
             if len(round_cards) == 2:
-                round_winner = self.getRoundWinner(round_cards)
+                round_winner = self.getRoundWinner(round)
                 round_cards.append(round_winner)
                 if round_winner != otherPlayer:
                     nextState.playerTurn = player
@@ -239,45 +239,62 @@ class Game:
                     nextState.winner = winner
         return nextState
 
-    def getRoundWinner(self, cards):
-        card1 = cards[0][0]  # (card , payer)
-        player1 = cards[0][1]
-        card2 = cards[1][0]
-        player2 = cards[1][1]
-        if card1.rank > card2.rank:
-            return player2
-        elif card1.rank < card2.rank:
-            return player1
+    def getRoundWinner(self, round):
+        
+        firstPlay = round[0]
+        secondPlay = round[1]
+
+        firstCard = firstPlay[0]  # (card , player)
+        firstCardPlayer = firstPlay[1]
+        secondCard = secondPlay[0]
+        secondCardPlayer = secondPlay[1]
+
+        if firstCard.rank > secondCard.rank:
+            return secondCardPlayer
+        elif firstCard.rank < secondCard.rank:
+            return firstCardPlayer
         else:  # Draw
             return None
 
     def getWinner(self, history):
-        # TODO: we are not taking into account some weird cases like double or triple draw
-        # TODO: we can leave it as is, as a simplification
 
-        wonRounds = [0, 0]  # [score player 1, score player 2]
+        player1 = self.player1
+        player2 = self.player2
+
+        roundsWonPerPlayer = defaultdict(0)
+        lastRound = 1
         for entry in history:
             # [(card, player) (card, player) winner]
             if len(entry) == 3:
-                roundWinner = entry[2]
-                if roundWinner == self.player1:
-                    wonRounds[0] = wonRounds[0] + 1
-                elif roundWinner == self.player2:
-                    wonRounds[1] = wonRounds[0] + 1
-                else:  # draw
-                    wonRounds[0] = wonRounds[0] + 1
-                    wonRounds[1] = wonRounds[1] + 1
 
-        if wonRounds[0] == wonRounds[1] == 2:
-            return history[0][2]
-        elif wonRounds[0] == 2:
-            return self.player1
-        elif wonRounds[1] == 2:
-            return self.player2
-        elif wonRounds[0] == wonRounds[1] == 3:  # Triple draw
-            return self.player1
-        else:
-            return None
+                lastRound += 1
+
+                roundWinner = entry[2]
+
+                if(roundWinner != None):
+                    roundsWonPerPlayer[roundWinner] += 1
+                else:
+                    roundsWonPerPlayer[player1] += 1
+                    roundsWonPerPlayer[player2] += 1
+
+        if (lastRound == 2):
+
+            if(roundsWonPerPlayer[player1] > roundsWonPerPlayer[player2]):
+                return player1
+            elif(roundsWonPerPlayer[player1] < roundsWonPerPlayer[player2]):
+                return player2
+
+        elif (lastRound == 3):
+            
+            if(roundsWonPerPlayer[player1] > roundsWonPerPlayer[player2]):
+                return player1
+            elif(roundsWonPerPlayer[player1] < roundsWonPerPlayer[player2]):
+                return player2
+            else: 
+                return player1
+        
+        return None
+
 
     def getHand(self):
         hand = []
