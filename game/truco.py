@@ -18,7 +18,7 @@ class ActionScore:
     PLAYER_FOLDED = 1
     ENVIDO_WON = 2
     ENVIDO_DECLINED = 1
-    
+
 
 class Card:
 
@@ -82,14 +82,14 @@ class GameState:
 
     def getPlayerScore(self, player):
         return self.playersScore[player]
-    
+
     def incrementPlayerScore(self, player, score):
         self.playersScore[player] += score
 
     def setEnvidoScores(self, player1, player2, player1Score, player2Score):
         self.envidoScore[player1] = player1Score
         self.envidoScore[player2] = player2Score
-    
+
     def getEnvidoScores(self, player1, player2):
         player1Score = self.envidoScore[player1]
         player2Score = self.envidoScore[player2]
@@ -101,7 +101,15 @@ class GameState:
             print("{} - SCORE {}".format(player.name, self.getPlayerScore(player)))
 
     def __str__(self):
-        return ""
+        return """
+        History: {} \n
+        Envido Scores: {} \n
+        Player Scores: {} \n
+        Hands: {} \n
+        """.format(str(self.history), str(self.envidoScore), str(self.playersScore), str(self.hands))
+
+        history = ', '.join([str(x) for x in self.history])
+        
 
 
 class Game:
@@ -133,9 +141,8 @@ class Game:
         player1EnvidoScore = self.getEnvidoScore(handPlayer1)
         player2EnvidoScore = self.getEnvidoScore(handPlayer2)
 
-        self.state.setEnvidoScores(self.player1, self.player2, player1EnvidoScore, player2EnvidoScore)
-
-
+        self.state.setEnvidoScores(
+            self.player1, self.player2, player1EnvidoScore, player2EnvidoScore)
 
     def generateDeck(self):
         # SWORDS
@@ -235,23 +242,23 @@ class Game:
             return [Actions.PLAY_CARD, Actions.TRUCO, Actions.FOLD]
 
         return [Actions.PLAY_CARD, Actions.FOLD]
-    
+
     def calculateEnvidoWinner(self, state):
-        
+
         player1 = self.player1
         player2 = self.player2
 
-        player1EnvidoScore, player2EnvidoScore = state.getEnvidoScores(player1, player2)
+        player1EnvidoScore, player2EnvidoScore = state.getEnvidoScores(
+            player1, player2)
 
         if(player1EnvidoScore >= player2EnvidoScore):
-            print("{} won with {} points against {} points".format(player1.name, player1EnvidoScore, player2EnvidoScore))
+            print("{} won with {} points against {} points".format(
+                player1.name, player1EnvidoScore, player2EnvidoScore))
             state.incrementPlayerScore(player1, ActionScore.ENVIDO_WON)
         else:
-            print("{} won with {} points against {} points".format(player2.name, player2EnvidoScore, player1EnvidoScore))
+            print("{} won with {} points against {} points".format(
+                player2.name, player2EnvidoScore, player1EnvidoScore))
             state.incrementPlayerScore(player2, ActionScore.ENVIDO_WON)
-
-        
-
 
     def playAction(self, player, state, action, card=None):
         if player != state.playerTurn:
@@ -283,29 +290,34 @@ class Game:
             nextState.winner = otherPlayer
             nextState.playerTurn = otherPlayer
 
-            nextState.incrementPlayerScore(otherPlayer, ActionScore.TRUCO_DECLINED)
+            nextState.incrementPlayerScore(
+                otherPlayer, ActionScore.TRUCO_DECLINED)
 
         if action == Actions.ACCEPT and state.envidoCalled:
             nextState.envidoAnswered = True
             nextState.playerTurn = otherPlayer
+            nextState.envidoCalled = False
 
             self.calculateEnvidoWinner(state)
-            
-            
+
         if action == Actions.DECLINE and state.envidoCalled:
             nextState.envidoAnswered = True
             nextState.playerTurn = otherPlayer
+            nextState.envidoCalled = False
 
-            nextState.incrementPlayerScore(otherPlayer, ActionScore.ENVIDO_DECLINED)
+            nextState.incrementPlayerScore(
+                otherPlayer, ActionScore.ENVIDO_DECLINED)
 
         if action == Actions.FOLD:
             nextState.winner = otherPlayer
             nextState.playerTurn = otherPlayer
 
             if(state.trucoAnswered):
-                nextState.incrementPlayerScore(otherPlayer, ActionScore.TRUCO_WON)
+                nextState.incrementPlayerScore(
+                    otherPlayer, ActionScore.TRUCO_WON)
             else:
-                nextState.incrementPlayerScore(otherPlayer, ActionScore.MATCH_WON)
+                nextState.incrementPlayerScore(
+                    otherPlayer, ActionScore.MATCH_WON)
 
         if action == Actions.PLAY_CARD:
 
@@ -317,24 +329,28 @@ class Game:
             nextState.playerTurn = otherPlayer
 
             if len(gameRound) == 2:
-                round_winner = self.getRoundWinner(gameRound)
-                gameRound.append(round_winner)
-                if round_winner != otherPlayer:
+                roundWinner = self.getRoundWinner(gameRound)
+                gameRound.append(roundWinner)
+
+                if roundWinner != otherPlayer:
                     nextState.playerTurn = player
+
                 nextState.round += 1
                 winner = self.getWinner(nextState.history)
 
                 if winner is not None:
                     nextState.winner = winner
                     if(state.trucoAnswered):
-                        nextState.incrementPlayerScore(otherPlayer, ActionScore.TRUCO_WON)
+                        nextState.incrementPlayerScore(
+                            otherPlayer, ActionScore.TRUCO_WON)
                     else:
-                        nextState.incrementPlayerScore(otherPlayer, ActionScore.MATCH_WON)
+                        nextState.incrementPlayerScore(
+                            otherPlayer, ActionScore.MATCH_WON)
 
         return nextState
 
     def getRoundWinner(self, gameRound):
-        
+
         firstPlay = gameRound[0]
         secondPlay = gameRound[1]
 
@@ -357,10 +373,10 @@ class Game:
 
         roundsWonPerPlayer = {
             player1: 0,
-            player2: 0    
+            player2: 0
         }
 
-        lastRound = 1
+        lastRound = 0
         for entry in history:
             # [(card, player) (card, player) winner]
             if len(entry) == 3:
@@ -383,16 +399,15 @@ class Game:
                 return player2
 
         elif (lastRound == 3):
-            
+
             if(roundsWonPerPlayer[player1] > roundsWonPerPlayer[player2]):
                 return player1
             elif(roundsWonPerPlayer[player1] < roundsWonPerPlayer[player2]):
                 return player2
-            else: 
+            else:
                 return player1
-        
-        return None
 
+        return None
 
     def getHand(self):
         hand = []

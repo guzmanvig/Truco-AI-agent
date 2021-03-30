@@ -20,11 +20,13 @@ def main():
     state = game.getState()
 
     while not state.getWinner():
+
         currentPlayer = state.playerTurn
         state = currentPlayer.play(state)
-        
-    
-    print(state.printScores())
+        print(state)
+
+
+    state.printScores()
     print("\n" + state.getWinnerName()+ " has won!!")
 
 
