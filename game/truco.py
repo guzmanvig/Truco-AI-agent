@@ -265,12 +265,12 @@ class Game:
             nextState.removeCardFromHand(player, card)
 
             index = nextState.round - 1
-            round_cards = nextState.history[index]
-            round_cards.append((card, player))
+            gameRound = nextState.history[index]
+            gameRound.append((card, player))
             nextState.playerTurn = otherPlayer
-            if len(round_cards) == 2:
-                round_winner = self.getRoundWinner(round)
-                round_cards.append(round_winner)
+            if len(gameRound) == 2:
+                round_winner = self.getRoundWinner(gameRound)
+                gameRound.append(round_winner)
                 if round_winner != otherPlayer:
                     nextState.playerTurn = player
                 nextState.round += 1
@@ -279,10 +279,10 @@ class Game:
                     nextState.winner = winner
         return nextState
 
-    def getRoundWinner(self, round):
+    def getRoundWinner(self, gameRound):
         
-        firstPlay = round[0]
-        secondPlay = round[1]
+        firstPlay = gameRound[0]
+        secondPlay = gameRound[1]
 
         firstCard = firstPlay[0]  # (card , player)
         firstCardPlayer = firstPlay[1]
@@ -301,7 +301,11 @@ class Game:
         player1 = self.player1
         player2 = self.player2
 
-        roundsWonPerPlayer = defaultdict(0)
+        roundsWonPerPlayer = {
+            player1: 0,
+            player2: 0    
+        }
+
         lastRound = 1
         for entry in history:
             # [(card, player) (card, player) winner]
