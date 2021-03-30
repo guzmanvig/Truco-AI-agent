@@ -49,6 +49,11 @@ class GameState:
         self.history = [[], [], []]
         self.winner = None
 
+        self.envidoScore = {
+            firstPlayer: None,
+            secondPlayer: None
+        }
+
         self.playersScore = {
             firstPlayer: 0,
             secondPlayer: 0
@@ -73,6 +78,16 @@ class GameState:
     def incrementPlayerScore(self, player, score):
         self.playersScore[player] += score
 
+    def setEnvidoScores(self, player1, player2, player1Score, player2Score):
+        self.envidoScore[player1] = player1Score
+        self.envidoScore[player2] = player2Score
+    
+    def getEnvidoScores(self, player1, player2):
+        player1Score = self.envidoScore[player1]
+        player2Score = self.envidoScore[player2]
+
+        return player1Score, player2Score
+
 
 class Game:
 
@@ -82,7 +97,6 @@ class Game:
         self.generateDeck()
         self.shuffleDeck()
 
-        # Deal cards to player
         self.player1 = None
         self.player2 = None
 
@@ -100,6 +114,13 @@ class Game:
 
         self.state = GameState(self.player1, self.player2,
                                handPlayer1, handPlayer2)
+
+        player1EnvidoScore = self.getEnvidoScore(handPlayer1)
+        player2EnvidoScore = self.getEnvidoScore(handPlayer2)
+
+        self.state.setEnvidoScores(self.player1, self.player2, player1EnvidoScore, player2EnvidoScore)
+
+
 
     def generateDeck(self):
         # SWORDS
@@ -204,15 +225,17 @@ class Game:
         
         player1 = self.player1
         player2 = self.player2
-        player1Hand = state.hands[player1]
-        player2Hand = state.hands[player2]
-        player1EnvidoScore = self.getEnvidoScore(player1Hand)
-        player2EnvidoScore = self.getEnvidoScore(player2Hand)
+
+        player1EnvidoScore, player2EnvidoScore = state.getEnvidoScores(player1, player2)
 
         if(player1EnvidoScore >= player2EnvidoScore):
+            print("{} won with {} points against {} points".format(player1.name, player1EnvidoScore, player2EnvidoScore))
             state.incrementPlayerScore(player1, ActionScore.ENVIDO_WON)
         else:
+            print("{} won with {} points against {} points".format(player2.name, player2EnvidoScore, player1EnvidoScore))
             state.incrementPlayerScore(player2, ActionScore.ENVIDO_WON)
+
+        
 
 
     def playAction(self, player, state, action, card=None):
