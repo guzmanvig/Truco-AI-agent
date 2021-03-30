@@ -42,13 +42,17 @@ class GameState:
     def __init__(self, firstPlayer, secondPlayer, firstPlayerHand, secondPlayerHand):
         self.round = 1
         self.playerTurn = firstPlayer
-        self.playersScore = defaultdict(0)
         self.trucoCalled = False
         self.trucoAnswered = False
         self.envidoCalled = False
         self.envidoAnswered = False
         self.history = [[], [], []]
         self.winner = None
+
+        self.playersScore = {
+            firstPlayer: 0,
+            secondPlayer: 0
+        }
 
         self.hands = {
             firstPlayer: firstPlayerHand,
@@ -205,12 +209,10 @@ class Game:
         player1EnvidoScore = self.getEnvidoScore(player1Hand)
         player2EnvidoScore = self.getEnvidoScore(player2Hand)
 
-        if(player1EnvidoScore > player2EnvidoScore):
-            state.updatePlayersScore(player1, ActionScore.ENVIDO_WON)
-        elif (player1EnvidoScore < player2EnvidoScore):
-            state.updatePlayersScore(player2, ActionScore.ENVIDO_WON)
-        else: 
-            state.updatePlayersScore(player1, ActionScore.ENVIDO_WON)
+        if(player1EnvidoScore >= player2EnvidoScore):
+            state.incrementPlayerScore(player1, ActionScore.ENVIDO_WON)
+        else:
+            state.incrementPlayerScore(player2, ActionScore.ENVIDO_WON)
 
 
     def playAction(self, player, state, action, card=None):
