@@ -12,11 +12,13 @@ class CardSuit:
 
 
 class ActionScore:
-    TRUCO_WON = 4
+    MATCH_WON = 1
+    TRUCO_WON = 2
     TRUCO_DECLINED = 1
     PLAYER_FOLDED = 1
     ENVIDO_WON = 2
     ENVIDO_DECLINED = 1
+    
 
 class Card:
 
@@ -64,6 +66,12 @@ class GameState:
             secondPlayer: secondPlayerHand
         }
 
+    def getWinner(self):
+        return self.winner
+
+    def getWinnerName(self):
+        return self.winner.name
+
     def removeCardFromHand(self, player, card):
         playerHand = copy(self.hands[player])
         playerHand.remove(card)
@@ -87,6 +95,13 @@ class GameState:
         player2Score = self.envidoScore[player2]
 
         return player1Score, player2Score
+
+    def printScores(self):
+        for player in self.playersScore.keys():
+            print("{} - SCORE {}".format(player.name, self.getPlayerScore(player)))
+
+    def __str__(self):
+        return ""
 
 
 class Game:
@@ -268,6 +283,8 @@ class Game:
             nextState.winner = otherPlayer
             nextState.playerTurn = otherPlayer
 
+            nextState.incrementPlayerScore(otherPlayer, ActionScore.TRUCO_DECLINED)
+
         if action == Actions.ACCEPT and state.envidoCalled:
             nextState.envidoAnswered = True
             nextState.playerTurn = otherPlayer
@@ -279,9 +296,16 @@ class Game:
             nextState.envidoAnswered = True
             nextState.playerTurn = otherPlayer
 
+            nextState.incrementPlayerScore(otherPlayer, ActionScore.ENVIDO_DECLINED)
+
         if action == Actions.FOLD:
             nextState.winner = otherPlayer
             nextState.playerTurn = otherPlayer
+
+            if(state.trucoAnswered):
+                nextState.incrementPlayerScore(otherPlayer, ActionScore.TRUCO_WON)
+            else:
+                nextState.incrementPlayerScore(otherPlayer, ActionScore.MATCH_WON)
 
         if action == Actions.PLAY_CARD:
 
@@ -291,6 +315,7 @@ class Game:
             gameRound = nextState.history[index]
             gameRound.append((card, player))
             nextState.playerTurn = otherPlayer
+
             if len(gameRound) == 2:
                 round_winner = self.getRoundWinner(gameRound)
                 gameRound.append(round_winner)
@@ -298,8 +323,14 @@ class Game:
                     nextState.playerTurn = player
                 nextState.round += 1
                 winner = self.getWinner(nextState.history)
+
                 if winner is not None:
                     nextState.winner = winner
+                    if(state.trucoAnswered):
+                        nextState.incrementPlayerScore(otherPlayer, ActionScore.TRUCO_WON)
+                    else:
+                        nextState.incrementPlayerScore(otherPlayer, ActionScore.MATCH_WON)
+
         return nextState
 
     def getRoundWinner(self, gameRound):
