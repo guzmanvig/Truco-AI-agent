@@ -9,8 +9,8 @@ class HumanPlayer:
         playerHand = state.hands[self]
         game = self.game
 
-        print("Your cards are: " + self.printHand(playerHand))
-        print(self.name + " type any of the following: ")
+        print("\n" + self.name + ", your cards are: " + self.printHand(playerHand))
+        print("Type any of the following: ")
         
         action = input(str(game.getLegalActions(self, state)) + "\n")
 

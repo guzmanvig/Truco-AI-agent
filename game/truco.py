@@ -98,7 +98,7 @@ class GameState:
 
     def printScores(self):
         for player in self.playersScore.keys():
-            print("{} - SCORE {}".format(player.name, self.getPlayerScore(player)))
+            print("{} - FINAL SCORE {}".format(player.name, self.getPlayerScore(player)))
 
     def __str__(self):
         return """
@@ -234,7 +234,7 @@ class Game:
             return [Actions.ACCEPT, Actions.DECLINE]
         if state.envidoCalled and not state.envidoAnswered:
             return [Actions.ACCEPT, Actions.DECLINE]
-        if not state.envidoCalled and state.round == 1:
+        if not state.envidoCalled and not state.envidoAnswered and state.round == 1:
             if not state.trucoCalled:
                 return [Actions.PLAY_CARD, Actions.ENVIDO, Actions.FOLD, Actions.TRUCO]
             return [Actions.PLAY_CARD, Actions.ENVIDO, Actions.FOLD]
@@ -252,11 +252,11 @@ class Game:
             player1, player2)
 
         if(player1EnvidoScore >= player2EnvidoScore):
-            print("{} won with {} points against {} points".format(
+            print("\n{} won envido with {} points against {} points".format(
                 player1.name, player1EnvidoScore, player2EnvidoScore))
             state.incrementPlayerScore(player1, ActionScore.ENVIDO_WON)
         else:
-            print("{} won with {} points against {} points".format(
+            print("\n{} won envido with {} points against {} points".format(
                 player2.name, player2EnvidoScore, player1EnvidoScore))
             state.incrementPlayerScore(player2, ActionScore.ENVIDO_WON)
 
@@ -282,25 +282,25 @@ class Game:
             nextState.envidoCalled = True
             nextState.playerTurn = otherPlayer
 
-        if action == Actions.ACCEPT and state.trucoCalled:
+        if action == Actions.ACCEPT and state.trucoCalled and not state.trucoAnswered:
             nextState.trucoAnswered = True
             nextState.playerTurn = otherPlayer
 
-        if action == Actions.DECLINE and state.trucoCalled:
+        if action == Actions.DECLINE and state.trucoCalled and not state.trucoAnswered:
             nextState.winner = otherPlayer
             nextState.playerTurn = otherPlayer
 
             nextState.incrementPlayerScore(
                 otherPlayer, ActionScore.TRUCO_DECLINED)
 
-        if action == Actions.ACCEPT and state.envidoCalled:
+        if action == Actions.ACCEPT and state.envidoCalled and not state.envidoAnswered:
             nextState.envidoAnswered = True
             nextState.playerTurn = otherPlayer
             nextState.envidoCalled = False
 
             self.calculateEnvidoWinner(state)
 
-        if action == Actions.DECLINE and state.envidoCalled:
+        if action == Actions.DECLINE and state.envidoCalled and not state.envidoAnswered:
             nextState.envidoAnswered = True
             nextState.playerTurn = otherPlayer
             nextState.envidoCalled = False
@@ -342,10 +342,10 @@ class Game:
                     nextState.winner = winner
                     if(state.trucoAnswered):
                         nextState.incrementPlayerScore(
-                            otherPlayer, ActionScore.TRUCO_WON)
+                            winner, ActionScore.TRUCO_WON)
                     else:
                         nextState.incrementPlayerScore(
-                            otherPlayer, ActionScore.MATCH_WON)
+                            winner, ActionScore.MATCH_WON)
 
         return nextState
 
