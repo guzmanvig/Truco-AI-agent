@@ -16,7 +16,7 @@ class MinimaxPlayer:
         card = best_action[1]
         cardString = "" if card is None else str(card)
 
-        print(self.name + " played " + action + " " + cardString)
+        print("\n" + self.name + " played " + action + " " + cardString)
 
         nextState = self.game.playAction(self, state, action, card)
 

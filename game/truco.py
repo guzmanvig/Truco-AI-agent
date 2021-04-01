@@ -51,6 +51,8 @@ class GameState:
         self.history = [[], [], []]
         self.winner = None
 
+        # IF ADDING STUFF HERE, REMEMBER TO ADD IT IN THE COPY METHOD
+
         self.envidoScore = {
             firstPlayer: None,
             secondPlayer: None
@@ -66,6 +68,8 @@ class GameState:
             secondPlayer: secondPlayerHand
         }
 
+        # IF ADDING STUFF HERE, REMEMBER TO ADD IT IN THE COPY METHOD
+
     def getWinner(self):
         return self.winner
 
@@ -76,6 +80,13 @@ class GameState:
         playerHand = copy(self.hands[player])
         playerHand.remove(card)
         self.hands[player] = playerHand
+
+        # playerHand = self.hands[player]
+        # newHand = []
+        # for card in playerHand:
+        #     if cardToRemove != card:
+        #         newHand.append(card)
+        # self.hands[player] = newHand
 
     def getPlayerHand(self, player):
         return copy(self.hands[player])
@@ -108,6 +119,37 @@ class GameState:
                     cards.append(card)
                     break
         return cards
+
+    def copy(self):
+        copy = GameState(None, None, None, None)
+        copy.round = self.round
+        copy.playerTurn = self.playerTurn
+        copy.trucoCalled = self.trucoCalled
+        copy.trucoAnswered = self.trucoAnswered
+        copy.envidoCalled = self.envidoCalled
+        copy.envidoAnswered = self.envidoAnswered
+        copy.winner = self.winner
+
+        copy.history = [[], [], []]
+        for i in range(len(self.history)):
+            for cardOrWinner in self.history[i]:
+                copy.history[i].append(cardOrWinner)
+
+        copy.envidoScore = {}
+        for player in self.envidoScore:
+            copy.envidoScore[player] = self.envidoScore[player]
+
+        copy.playersScore = {}
+        for player in self.playersScore:
+            copy.playersScore[player] = self.playersScore[player]
+
+        copy.hands = {}
+        for player in self.hands:
+            copy.hands[player] = self.hands[player]
+
+        return copy
+
+
 
 
     def printScores(self):
@@ -283,7 +325,7 @@ class Game:
         if action not in legalActions:
             raise ValueError('Invalid action')
 
-        nextState = copy(state)
+        nextState = state.copy()
 
         if player == self.player1:
             otherPlayer = self.player2
@@ -314,7 +356,7 @@ class Game:
             nextState.playerTurn = otherPlayer
             nextState.envidoCalled = False
 
-            self.calculateEnvidoWinner(state)
+            self.calculateEnvidoWinner(nextState)
 
         if action == Actions.DECLINE and state.envidoCalled and not state.envidoAnswered:
             nextState.envidoAnswered = True

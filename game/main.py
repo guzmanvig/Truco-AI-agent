@@ -10,7 +10,7 @@ def main():
 
     player1 = HumanPlayer("Guzman", game)
     #player2 = HumanPlayer("Agustin", game)
-    player2 = MinimaxPlayer("MiniMax", game, 2)
+    player2 = MinimaxPlayer("MiniMax", game, 1)
 
 
     game.setPlayers(player1, player2)
