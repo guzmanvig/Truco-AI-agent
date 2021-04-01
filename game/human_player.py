@@ -3,6 +3,7 @@ class HumanPlayer:
     def __init__(self, name, game):
         self.name = name
         self.game = game
+        self.isHuman = True
 
     def play(self, state):
 

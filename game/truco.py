@@ -96,6 +96,20 @@ class GameState:
 
         return player1Score, player2Score
 
+
+    def getPlayedCardsByPlayer(self, player):
+        cards = []
+        for round in self.history:
+            for i in range(len(round)):
+                cardPlay = round[i]
+                card = cardPlay[0]
+                cardPlayer = cardPlay[1]
+                if player == cardPlayer:
+                    cards.append(card)
+                    break
+        return cards
+
+
     def printScores(self):
         for player in self.playersScore.keys():
             print("{} - FINAL SCORE {}".format(player.name, self.getPlayerScore(player)))
@@ -126,14 +140,16 @@ class Game:
     def getState(self):
         return self.state
 
+    def getDeck(self):
+        return self.deck
+
     def setPlayers(self, player1, player2):
 
         self.player1 = player1
         self.player2 = player2
 
     def initGameState(self):
-        handPlayer1 = self.getHand()
-        handPlayer2 = self.getHand()
+        handPlayer1, handPlayer2 = self.getHands()
 
         self.state = GameState(self.player1, self.player2,
                                handPlayer1, handPlayer2)
@@ -409,12 +425,45 @@ class Game:
 
         return None
 
-    def getHand(self):
-        hand = []
-        for i in range(3):
-            hand.append(self.deck.pop(0))
+    def evaluateState(self, state, maxPlayer):
+        if self.player1 == maxPlayer:
+            otherPlayer = self.player2
+        else:
+            otherPlayer = self.player1
 
-        return hand
+        maxPlayerScore = state.getPlayerScore(maxPlayer)
+        otherPlayerScore = state.getPlayerScore(otherPlayer)
+
+        if state.getWinner() is not None:
+            # Do the subtraction so min will try to improve his score, not just try to max be less as possible
+            return maxPlayerScore - otherPlayerScore
+        else:
+            # TODO: use envido score and cards already played to reduce legalActions. Not sure if here too.
+            # We use the current score (might be not 0 if someone won envido)
+            # Plus a measure of how good the cards in our hands are, multiplied by 2 if truco was played
+            score = maxPlayerScore - otherPlayerScore
+
+            maxPlayerHand = state.getPlayerHand(maxPlayer)
+            trucoMultiplier = 2 if state.trucoAnswered else 1
+            for card in maxPlayerHand:
+                score += (1 / card.rank) * trucoMultiplier
+
+            # TODO: multiply according to current round
+
+            return score
+
+
+
+    def getHands(self):
+        hand1 = []
+        hand2 = []
+        for i in range(6):
+            if i < 3:
+                hand1.append(self.deck[i])
+            else:
+                hand2.append(self.deck[i])
+
+        return hand1, hand2
 
     def printDeck(self):
         for card in self.deck:
