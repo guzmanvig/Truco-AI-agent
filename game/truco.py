@@ -78,9 +78,10 @@ class GameState:
         return self.winner.name
 
     def removeCardFromHand(self, player, card):
-        playerHand = copy(self.hands[player])
-        playerHand.remove(card)
-        self.hands[player] = playerHand
+        if card in self.hands[player]:
+            playerHand = copy(self.hands[player])
+            playerHand.remove(card)
+            self.hands[player] = playerHand
 
     def getPlayerHand(self, player):
         return copy(self.hands[player])
@@ -298,7 +299,7 @@ class Game:
 
     def calculateEnvidoWinner(self, state):
 
-        if not state.envidoAnswered:
+        if not state.envidoAccepted:
             return
 
         player1 = self.player1
