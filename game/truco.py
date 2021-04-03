@@ -123,7 +123,7 @@ class GameState:
         copy.trucoAnswered = self.trucoAnswered
         copy.envidoCalled = self.envidoCalled
         copy.envidoAnswered = self.envidoAnswered
-        copy.envidoAnswered = self.envidoAnswered
+        copy.envidoAccepted = self.envidoAccepted
         copy.winner = self.winner
 
         copy.history = [[], [], []]
