@@ -9,8 +9,8 @@ def main():
     game = Game()
 
     player1 = HumanPlayer("Guzman", game)
-    #player2 = HumanPlayer("Agustin", game)
-    player2 = MinimaxPlayer("MiniMax", game, 1)
+    # player2 = HumanPlayer("Agustin", game)
+    player2 = MinimaxPlayer("MiniMax", game, 2)
 
 
     game.setPlayers(player1, player2)
@@ -21,6 +21,8 @@ def main():
 
         currentPlayer = state.playerTurn
         state = currentPlayer.play(state)
+
+    game.calculateEnvidoWinner(state)
 
     print("\n" + state.getWinnerName() + " has won truco \n")
     print("Final scores:")

@@ -48,6 +48,7 @@ class GameState:
         self.trucoAnswered = False
         self.envidoCalled = False
         self.envidoAnswered = False
+        self.envidoAccepted = False
         self.history = [[], [], []]
         self.winner = None
 
@@ -80,13 +81,6 @@ class GameState:
         playerHand = copy(self.hands[player])
         playerHand.remove(card)
         self.hands[player] = playerHand
-
-        # playerHand = self.hands[player]
-        # newHand = []
-        # for card in playerHand:
-        #     if cardToRemove != card:
-        #         newHand.append(card)
-        # self.hands[player] = newHand
 
     def getPlayerHand(self, player):
         return copy(self.hands[player])
@@ -127,6 +121,7 @@ class GameState:
         copy.trucoCalled = self.trucoCalled
         copy.trucoAnswered = self.trucoAnswered
         copy.envidoCalled = self.envidoCalled
+        copy.envidoAnswered = self.envidoAnswered
         copy.envidoAnswered = self.envidoAnswered
         copy.winner = self.winner
 
@@ -303,6 +298,9 @@ class Game:
 
     def calculateEnvidoWinner(self, state):
 
+        if not state.envidoAnswered:
+            return
+
         player1 = self.player1
         player2 = self.player2
 
@@ -355,8 +353,7 @@ class Game:
             nextState.envidoAnswered = True
             nextState.playerTurn = otherPlayer
             nextState.envidoCalled = False
-
-            self.calculateEnvidoWinner(nextState)
+            nextState.envidoAccepted = True
 
         if action == Actions.DECLINE and state.envidoCalled and not state.envidoAnswered:
             nextState.envidoAnswered = True
@@ -480,8 +477,7 @@ class Game:
             # Do the subtraction so min will try to improve his score, not just try to max be less as possible
             return maxPlayerScore - otherPlayerScore
         else:
-            # TODO: use envido score and cards already played to reduce legalActions. Not sure if here too.
-            # We use the current score (might be not 0 if someone won envido)
+            # TODO: use envido some measure of how good the envido would be if it was played
             # Plus a measure of how good the cards in our hands are, multiplied by 2 if truco was played
             score = maxPlayerScore - otherPlayerScore
 
