@@ -2,6 +2,7 @@ import random
 from itertools import combinations
 from copy import copy, deepcopy
 from collections import defaultdict
+import math
 
 
 class CardSuit:
@@ -70,6 +71,9 @@ class GameState:
         }
 
         # IF ADDING STUFF HERE, REMEMBER TO ADD IT IN THE COPY METHOD
+    
+    def getCurrentRound(self):
+        return self.round
 
     def getWinner(self):
         return self.winner
@@ -102,6 +106,8 @@ class GameState:
 
         return player1Score, player2Score
 
+    def getEnvidoScores(self, player):
+        return self.envidoScore[player]
 
     def getPlayedCardsByPlayer(self, player):
         cards = []
@@ -160,9 +166,7 @@ class GameState:
         Hands: {} \n
         """.format(str(self.history), str(self.envidoScore), str(self.playersScore), str(self.hands))
 
-        history = ', '.join([str(x) for x in self.history])
         
-
 
 class Game:
 
@@ -192,8 +196,8 @@ class Game:
         self.state = GameState(self.player1, self.player2,
                                handPlayer1, handPlayer2)
 
-        player1EnvidoScore = self.getEnvidoScore(handPlayer1)
-        player2EnvidoScore = self.getEnvidoScore(handPlayer2)
+        player1EnvidoScore = self.calculateEnvidoScore(handPlayer1)
+        player2EnvidoScore = self.calculateEnvidoScore(handPlayer2)
 
         self.state.setEnvidoScores(
             self.player1, self.player2, player1EnvidoScore, player2EnvidoScore)
@@ -252,7 +256,7 @@ class Game:
     def shuffleDeck(self):
         random.shuffle(self.deck)
 
-    def getEnvidoScore(self, hand):
+    def calculateEnvidoScore(self, hand):
         # Calculate points of envido.
         pairCombinations = list(combinations(hand, 2))
 
@@ -480,13 +484,22 @@ class Game:
         else:
             # TODO: use envido some measure of how good the envido would be if it was played
             # Plus a measure of how good the cards in our hands are, multiplied by 2 if truco was played
+
+            envidoScore = 0
+            if(state.getRound() == 1):
+                envidoPoints = state.getEnvidoScore(maxPlayerScore)
+                envidoScore = math.log(envidoPoints)
+
             score = maxPlayerScore - otherPlayerScore
 
             maxPlayerHand = state.getPlayerHand(maxPlayer)
             trucoMultiplier = 2 if state.trucoAnswered else 1
             for card in maxPlayerHand:
                 score += (1 / card.rank) * trucoMultiplier
+            
 
+            # Adding envido score.
+            score += envidoScore
             # TODO: multiply according to current round
 
             return score
