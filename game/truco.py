@@ -3,6 +3,7 @@ from itertools import combinations
 from copy import copy, deepcopy
 from collections import defaultdict
 import math
+import random
 
 
 class CardSuit:
@@ -486,9 +487,12 @@ class Game:
             # Plus a measure of how good the cards in our hands are, multiplied by 2 if truco was played
 
             envidoScore = 0
+            randomNumber = random.random()
+            flipCoin = 1 if randomNumber > 0.5 else 0
             if(state.getCurrentRound() == 1):
+
                 envidoPoints = state.getEnvidoScore(maxPlayerScore)
-                envidoScore = math.log(envidoPoints)
+                envidoScore = math.log(envidoPoints) * flipCoin
 
             score = maxPlayerScore - otherPlayerScore
 
