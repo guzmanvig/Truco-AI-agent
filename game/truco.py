@@ -486,7 +486,7 @@ class Game:
             # Plus a measure of how good the cards in our hands are, multiplied by 2 if truco was played
 
             envidoScore = 0
-            if(state.getRound() == 1):
+            if(state.getCurrentRound() == 1):
                 envidoPoints = state.getEnvidoScore(maxPlayerScore)
                 envidoScore = math.log(envidoPoints)
 
