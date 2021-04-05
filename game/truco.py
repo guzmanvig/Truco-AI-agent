@@ -107,7 +107,7 @@ class GameState:
 
         return player1Score, player2Score
 
-    def getEnvidoScores(self, player):
+    def getEnvidoScore(self, player):
         return self.envidoScore[player]
 
     def getPlayedCardsByPlayer(self, player):
@@ -486,13 +486,16 @@ class Game:
             # TODO: use envido some measure of how good the envido would be if it was played
             # Plus a measure of how good the cards in our hands are, multiplied by 2 if truco was played
 
-            envidoScore = 0
-            randomNumber = random.random()
-            flipCoin = 1 if randomNumber > 0.5 else 0
-            if(state.getCurrentRound() == 1):
 
+            # Envido evaluation
+            envidoScore = 0
+            
+            if(state.getCurrentRound() == 1):
                 envidoPoints = state.getEnvidoScore(maxPlayerScore)
-                envidoScore = math.log(envidoPoints) * flipCoin
+                threshold = 33 / envidoPoints
+                callEnvido = 1 if random.random() <= threshold else 0
+                envidoScore = math.log(envidoPoints) * callEnvido
+                  
 
             score = maxPlayerScore - otherPlayerScore
 
