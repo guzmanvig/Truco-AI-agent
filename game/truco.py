@@ -72,6 +72,9 @@ class GameState:
         }
 
         # IF ADDING STUFF HERE, REMEMBER TO ADD IT IN THE COPY METHOD
+
+    def getEnvidoAnswered(self):
+        return self.envidoAnswered
     
     def getCurrentRound(self):
         return self.round
@@ -490,13 +493,16 @@ class Game:
             # Envido evaluation
             envidoScore = 0
             
-            if(state.getCurrentRound() == 1):
-                envidoPoints = state.getEnvidoScore(maxPlayerScore)
-                threshold = 33 / envidoPoints
-                callEnvido = 1 if random.random() <= threshold else 0
-                envidoScore = math.log(envidoPoints) * callEnvido
-                  
+            if(state.getEnvidoAnswered() == True):
 
+                envidoPoints = state.getEnvidoScore(maxPlayer)
+
+                if(envidoPoints >= 26):
+                    envidoScore = envidoPoints / 33
+                else:
+                    # Adding one to avoid a zero envidoScore.
+                    envidoScore = -1 * (envidoPoints + 1) / 33
+                    
             score = maxPlayerScore - otherPlayerScore
 
             maxPlayerHand = state.getPlayerHand(maxPlayer)
