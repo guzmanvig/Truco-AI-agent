@@ -2,6 +2,8 @@
 from human_player import HumanPlayer
 from truco import Game
 from minimax_player import MinimaxPlayer
+from alphabeta_player import AlphaBetaPlayer
+
 
 
 def main():
@@ -10,7 +12,9 @@ def main():
 
     player1 = HumanPlayer("Guzman", game)
     # player2 = HumanPlayer("Agustin", game)
-    player2 = MinimaxPlayer("MiniMax", game, 6)
+    # player2 = MinimaxPlayer("MiniMax", game, 6)
+    player2 = AlphaBetaPlayer("AlphaBeta", game, 6)
+
 
 
     game.setPlayers(player1, player2)
