@@ -7,7 +7,6 @@ class MinimaxPlayer:
         self.name = name
         self.game = game
         self.depth = depth
-        self.isHuman = False
 
     def play(self, state):
 

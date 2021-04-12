@@ -1,4 +1,5 @@
 
+from random_player import RandomPlayer
 from truco import Game
 from alphabeta_player import AlphaBetaPlayer
 
@@ -8,11 +9,11 @@ def evaluate():
     reflexScore = 0
     alphaBetaScore = 0
 
-    for i in range(100):
+    for i in range(50):
 
         game = Game()
 
-        player1 = AlphaBetaPlayer("Reflex", game, 1)
+        player1 = RandomPlayer("Random", game)
         player2 = AlphaBetaPlayer("AlphaBeta", game, 6)
 
         game.setPlayers(player1, player2)

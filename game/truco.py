@@ -484,7 +484,7 @@ class Game:
 
         if state.getWinner() is not None:
             # Do the subtraction so min will try to improve his score, not just try to max be less as possible
-            return maxPlayerScore - otherPlayerScore
+            return maxPlayerScore
         else:
             # TODO: use envido some measure of how good the envido would be if it was played
             # Plus a measure of how good the cards in our hands are, multiplied by 2 if truco was played
