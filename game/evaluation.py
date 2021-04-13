@@ -15,12 +15,12 @@ def evaluate():
     player2Name = "QLearning"
     # player2Name = "AlphaBeta"
 
-    for i in range(100):
+    for i in range(200):
 
         game = Game()
 
-        #player1 = RandomPlayer(player1Name, game)
-        player1 = AlphaBetaPlayer(player1Name, game, 6)
+        player1 = RandomPlayer(player1Name, game)
+        #player1 = AlphaBetaPlayer(player1Name, game, 1)
 
         # player2 = AlphaBetaPlayer(player2Name, game, 6)
         player2 = QLearningPlayer(player2Name, game)
@@ -44,8 +44,11 @@ def evaluate():
         reflexScore += state.getPlayerScore(player1)
         alphaBetaScore += state.getPlayerScore(player2)
 
+    print("\n\nRESULTS")
+    print("----------------------------")
     print(player1Name + " final score: " + str(reflexScore))
     print(player2Name + " final score: " + str(alphaBetaScore))
+    print("----------------------------")
 
 
 
