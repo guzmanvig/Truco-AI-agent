@@ -78,25 +78,25 @@ class GameState:
     def getObservation(self, player):
         result = list()
 
-        envidoAnswered = 1 if self.envidoAnswered else 0
-        envidoCalled = 1 if self.envidoCalled else 0
-        trucoAnswered = 1 if self.trucoAnswered else 0
-        trucoCalled = 1 if self.trucoCalled else 0
+        envidoAnswered = 1 if self.envidoAnswered else -1
+        envidoCalled = 1 if self.envidoCalled else -1
+        trucoAnswered = 1 if self.trucoAnswered else -1
+        trucoCalled = 1 if self.trucoCalled else -1
 
         cardsPlayed = []
         for round in self.history:
 
             if len(round) > 2:
 
-                firstCard = round[0]
-                secondCard = round[1]
+                firstCard = round[0][0]
+                secondCard = round[1][0]
                 cardsPlayed.extend(
                     [firstCard.number, firstCard.rank, secondCard.number, secondCard.rank])
 
             elif len(round) == 1:
-                firstCard = round[0]
+                firstCard = round[0][0]
                 cardsPlayed.extend(
-                    [firstCard.number, firstCard.rank])
+                    [firstCard.number, firstCard.rank, -1, -1])
 
             else:
                 cardsPlayed.extend([-1, -1, -1, -1])
@@ -113,7 +113,7 @@ class GameState:
             else:
                 hand.extend([-1, -1])
 
-
+        result.extend(hand)
         result.extend([
             envidoAnswered,
             envidoCalled,
@@ -122,6 +122,7 @@ class GameState:
         ])
 
         result.extend(cardsPlayed)
+        return result
 
 
     def getEnvidoAnswered(self):
@@ -230,6 +231,14 @@ class Game:
 
         self.player1 = None
         self.player2 = None
+
+    def reset(self):
+        # Create deck
+        self.deck = None
+        self.generateDeck()
+        self.shuffleDeck()
+
+        self.initGameState()
 
     def getState(self):
         return self.state

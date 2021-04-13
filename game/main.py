@@ -4,6 +4,7 @@ from truco import Game
 from minimax_player import MinimaxPlayer
 from alphabeta_player import AlphaBetaPlayer
 
+from game.QLearning_player import QLearningPlayer
 
 
 def main():
@@ -13,7 +14,9 @@ def main():
     player1 = HumanPlayer("Guzman", game)
     # player2 = HumanPlayer("Agustin", game)
     # player2 = MinimaxPlayer("MiniMax", game, 6)
-    player2 = AlphaBetaPlayer("AlphaBeta", game, 6)
+    # player2 = AlphaBetaPlayer("AlphaBeta", game, 6)
+    player2 = QLearningPlayer("QLearning", game)
+
 
 
 
