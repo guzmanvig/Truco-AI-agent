@@ -73,9 +73,58 @@ class GameState:
 
         # IF ADDING STUFF HERE, REMEMBER TO ADD IT IN THE COPY METHOD
 
+    def getObservation(self, player):
+        result = list()
+
+        envidoAnswered = 1 if self.envidoAnswered else 0
+        envidoCalled = 1 if self.envidoCalled else 0
+        trucoAnswered = 1 if self.trucoAnswered else 0
+        trucoCalled = 1 if self.trucoCalled else 0
+
+        cardsPlayed = []
+        for round in self.history:
+
+            if len(round) > 2:
+
+                firstCard = round[0]
+                secondCard = round[1]
+                cardsPlayed.extend(
+                    [firstCard.number, firstCard.rank, secondCard.number, secondCard.rank])
+
+            elif len(round) == 1:
+                firstCard = round[0]
+                cardsPlayed.extend(
+                    [firstCard.number, firstCard.rank])
+
+            else:
+                cardsPlayed.extend([-1, -1, -1, -1])
+
+
+        hand = []
+        playerHand = self.getPlayerHand(player)
+        for cardIdx in range(3):
+            if cardIdx < len(playerHand):
+                card = playerHand[cardIdx]
+                cardNumber = card.number
+                cardRank = card.rank
+                hand.extend([cardNumber, cardRank])
+            else:
+                hand.extend([-1, -1])
+
+
+        result.extend([
+            envidoAnswered,
+            envidoCalled,
+            trucoAnswered,
+            trucoCalled
+        ])
+
+        result.extend(cardsPlayed)
+
+
     def getEnvidoAnswered(self):
         return self.envidoAnswered
-    
+
     def getCurrentRound(self):
         return self.round
 
@@ -155,12 +204,10 @@ class GameState:
 
         return copy
 
-
-
-
     def printScores(self):
         for player in self.playersScore.keys():
-            print("{} - FINAL SCORE {}".format(player.name, self.getPlayerScore(player)))
+            print("{} - FINAL SCORE {}".format(player.name,
+                  self.getPlayerScore(player)))
 
     def __str__(self):
         return """
@@ -170,7 +217,6 @@ class GameState:
         Hands: {} \n
         """.format(str(self.history), str(self.envidoScore), str(self.playersScore), str(self.hands))
 
-        
 
 class Game:
 
@@ -489,10 +535,9 @@ class Game:
             # TODO: use envido some measure of how good the envido would be if it was played
             # Plus a measure of how good the cards in our hands are, multiplied by 2 if truco was played
 
-
             # Envido evaluation
             envidoScore = 0
-            
+
             if(state.getEnvidoAnswered() == True):
 
                 envidoPoints = state.getEnvidoScore(maxPlayer)
@@ -502,22 +547,19 @@ class Game:
                 else:
                     # Adding one to avoid a zero envidoScore.
                     envidoScore = -1 * (envidoPoints + 1) / 33
-                    
+
             score = maxPlayerScore - otherPlayerScore
 
             maxPlayerHand = state.getPlayerHand(maxPlayer)
             trucoMultiplier = 2 if state.trucoAnswered else 1
             for card in maxPlayerHand:
                 score += (1 / card.rank) * trucoMultiplier
-            
 
             # Adding envido score.
             score += envidoScore
             # TODO: multiply according to current round
 
             return score
-
-
 
     def getHands(self):
         hand1 = []
