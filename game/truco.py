@@ -73,6 +73,8 @@ class GameState:
 
         # IF ADDING STUFF HERE, REMEMBER TO ADD IT IN THE COPY METHOD
 
+    
+
     def getObservation(self, player):
         result = list()
 
