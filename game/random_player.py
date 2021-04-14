@@ -13,7 +13,7 @@ class RandomPlayer:
         action, card = self.randomMove(state)
         cardString = "" if card is None else str(card)
 
-        # print("\n" + self.name + " played " + action + " " + cardString)
+        print("\n" + self.name + " played " + action + " " + cardString)
 
         nextState = self.game.playAction(self, state, action, card)
 

@@ -246,6 +246,12 @@ class Game:
     def getDeck(self):
         return self.deck
 
+    def getOpponent(self, player):
+        if player == self.player1:
+            return self.player2
+        else:
+            return self.player1
+
     def setPlayers(self, player1, player2):
 
         self.player1 = player1

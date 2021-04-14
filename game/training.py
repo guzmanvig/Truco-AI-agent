@@ -10,16 +10,15 @@ from game.truco import Game
 game = Game()
 
 player1 = QLearningPlayer("QLearning", game)
-player2 = RandomPlayer("Random", game)
+
+player2 = AlphaBetaPlayer("AlphaBeta", game, 2)
+# player2 = RandomPlayer("Random", game)
 
 game.setPlayers(player1, player2)
 game.initGameState()
 
 env = TrucoEnv(game, player1)
-# It will check your custom environment and output additional warnings if needed
-# check_env(env)
 
-# model = A2C('MlpPolicy', env).learn(total_timesteps=1000)
 model = DQN("MlpPolicy", env, learning_rate=0.001, batch_size=20)
 model.learn(total_timesteps=1000000)
 model.save("QLearning_model")

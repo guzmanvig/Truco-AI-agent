@@ -10,20 +10,21 @@ from QLearning_player import QLearningPlayer
 def evaluate():
     reflexScore = 0
     alphaBetaScore = 0
-    player1Name = "Random"
-    # player1Name = "Reflex"
-    player2Name = "QLearning"
-    # player2Name = "AlphaBeta"
+    # player1Name = "Random"
+    player1Name = "Reflex"
+    #player1Name = "AlphaBeta"
+    #player2Name = "QLearning"
+    player2Name = "AlphaBeta"
 
     for i in range(200):
 
         game = Game()
 
-        player1 = RandomPlayer(player1Name, game)
-        #player1 = AlphaBetaPlayer(player1Name, game, 1)
+        # player1 = RandomPlayer(player1Name, game)
+        player1 = AlphaBetaPlayer(player1Name, game, 1)
 
-        # player2 = AlphaBetaPlayer(player2Name, game, 6)
-        player2 = QLearningPlayer(player2Name, game)
+        player2 = AlphaBetaPlayer(player2Name, game, 6)
+        #player2 = QLearningPlayer(player2Name, game)
 
 
         game.setPlayers(player1, player2)

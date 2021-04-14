@@ -9,7 +9,8 @@ class QLearningPlayer:
     def __init__(self, name, game):
         self.name = name
         self.game = game
-        self.model = DQN.load(path="QLearning_model.zip")
+        self.model = DQN.load(path="QLearning_model_trained_against_random.zip")
+        # self.model = DQN.load(path="QLearning_model_trained_against_alphabeta.zip")
 
     def play(self, state):
         observation = np.array(state.getObservation(self))
