@@ -86,15 +86,15 @@ class GameState:
 
             if len(round) > 2:
 
-                firstCard = round[0]
-                secondCard = round[1]
+                firstCard = round[0][0]
+                secondCard = round[1][0]
                 cardsPlayed.extend(
                     [firstCard.number, firstCard.rank, secondCard.number, secondCard.rank])
 
             elif len(round) == 1:
-                firstCard = round[0]
+                firstCard = round[0][0]
                 cardsPlayed.extend(
-                    [firstCard.number, firstCard.rank])
+                    [firstCard.number, firstCard.rank, -1, -1])
 
             else:
                 cardsPlayed.extend([-1, -1, -1, -1])
@@ -110,6 +110,7 @@ class GameState:
             else:
                 hand.extend([-1, -1])
 
+        result.extend(hand)
         result.extend([
             envidoAnswered,
             envidoCalled,
@@ -118,6 +119,7 @@ class GameState:
         ])
 
         result.extend(cardsPlayed)
+        return result
 
         return result
 
@@ -554,7 +556,7 @@ class Game:
                     envidoScore = envidoPoints / 33
                 else:
                     # Adding one to avoid a zero envidoScore.
-                    envidoScore = -1 * (1 - envidoPoints) / 33
+                    envidoScore = -1 * (1 - envidoPoints / 33)
 
             score = maxPlayerScore - otherPlayerScore
 
