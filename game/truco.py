@@ -73,15 +73,13 @@ class GameState:
 
         # IF ADDING STUFF HERE, REMEMBER TO ADD IT IN THE COPY METHOD
 
-    
-
     def getObservation(self, player):
         result = list()
 
-        envidoAnswered = 1 if self.envidoAnswered else 0
-        envidoCalled = 1 if self.envidoCalled else 0
-        trucoAnswered = 1 if self.trucoAnswered else 0
-        trucoCalled = 1 if self.trucoCalled else 0
+        envidoAnswered = 1 if self.envidoAnswered else -1
+        envidoCalled = 1 if self.envidoCalled else -1
+        trucoAnswered = 1 if self.trucoAnswered else -1
+        trucoCalled = 1 if self.trucoCalled else -1
 
         cardsPlayed = []
         for round in self.history:
@@ -101,7 +99,6 @@ class GameState:
             else:
                 cardsPlayed.extend([-1, -1, -1, -1])
 
-
         hand = []
         playerHand = self.getPlayerHand(player)
         for cardIdx in range(3):
@@ -113,7 +110,6 @@ class GameState:
             else:
                 hand.extend([-1, -1])
 
-
         result.extend([
             envidoAnswered,
             envidoCalled,
@@ -123,6 +119,7 @@ class GameState:
 
         result.extend(cardsPlayed)
 
+        return result
 
     def getEnvidoAnswered(self):
         return self.envidoAnswered
@@ -230,6 +227,15 @@ class Game:
 
         self.player1 = None
         self.player2 = None
+
+    def reset(self):
+
+        # Create deck
+        self.deck = None
+        self.generateDeck()
+        self.shuffleDeck()
+
+        self.initGameState()
 
     def getState(self):
         return self.state
@@ -548,7 +554,7 @@ class Game:
                     envidoScore = envidoPoints / 33
                 else:
                     # Adding one to avoid a zero envidoScore.
-                    envidoScore = -1 * (envidoPoints + 1) / 33
+                    envidoScore = -1 * (1 - envidoPoints) / 33
 
             score = maxPlayerScore - otherPlayerScore
 
